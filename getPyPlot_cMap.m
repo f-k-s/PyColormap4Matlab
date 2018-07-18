@@ -1,5 +1,5 @@
 function cmp = getPyPlot_cMap(nam,n,keepAlpha,pyCmd)
-% cmp = getPyPlot_cMap(nam [, n, pyCmd])
+% cmp = getPyPlot_cMap(nam [, n, keepAlpha, pyCmd])
 %
 %
 % ::INPUT::
