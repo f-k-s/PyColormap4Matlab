@@ -69,7 +69,7 @@ if ~exist('pyCmd','var') || isempty(pyCmd)
 end
 
 pyScript = which('pyplotCMap2txt.py');
-assert(~isempty(pyScript), 'getPyPlot_cMap:SystemCMDFailed', ...
+assert(~isempty(pyScript), 'getPyPlot_cMap:PyScriptNotFound', ...
     'Could not find python script (%s).','pyplotCMap2txt.py');
 
 tmpf = tempname;
