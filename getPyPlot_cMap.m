@@ -58,14 +58,15 @@ function cmp = getPyPlot_cMap(nam,n,keepAlpha,pyCmd)
 %     flag        ocean             RdPu              YlOrRd
 %     flag_r      ocean_r           RdPu_r            YlOrRd_r
 % 
-% V 1.1; Konrad Schumacher, 08.2018
+% V 1.2; Konrad Schumacher, 08.2018
 
 if strcmpi(nam,'!GetNames')
-    cmp = getNames;
-    return;
+    % translate switch to retrieve colormap names into python-switch:
+    nam = 'listCMapNames';
 end
 
 
+% defaults:
 if ~exist('n','var') || isempty(n)
     n = 128;
 end
@@ -77,55 +78,43 @@ if ~exist('pyCmd','var') || isempty(pyCmd)
 end
 
 
+% check if python script is present
 pyScript = which('pyplotCMap2txt.py');
 assert(~isempty(pyScript), 'getPyPlot_cMap:PyScriptNotFound', ...
     'Could not find python script (%s).','pyplotCMap2txt.py');
 
 tmpf = tempname;
 
+% call python script
 comd = sprintf('%s %s %s -o %s -n %d', pyCmd, pyScript, nam, tmpf, n);
 [s,m] = system(comd);
 
+% check if system command ran w/o error
 assert(s==0, 'getPyPlot_cMap:SystemCMDFailed', ...
         'There was an error executing the command\n\t%s\nSystem returned:\n\t%s', ...
         comd, m);
 
 
-cmp = load(tmpf,'-ascii');
+if strcmp(nam,'listCMapNames')
+    % cMap names retrieved; read text file
+    fid = fopen(tmpf,'r');
+    cmp = textscan(fid,'%s');
+    fclose(fid);
+    cmp = cmp{1};
+    
+else
+    % load cMap data from text file
+    cmp = load(tmpf,'-ascii');
+
+    if keepAlpha
+    else % remove 4th column of alpha values
+        cmp = cmp(:,1:3);
+    end
+end
+
+
+% delete temp-file
 delete(tmpf);
 
-if keepAlpha
-else
-    cmp = cmp(:,1:3);
 end
 
-
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-function l = getNames
-%
-
-l = {'Accent'; 'afmhot'; 'autumn'; 'binary'; 'Blues'; 'bone'; 'BrBG'; 'brg'
-'BuGn'; 'BuPu'; 'bwr'; 'CMRmap'; 'cool'; 'coolwarm'; 'copper'; 'cubehelix'
-'Dark2'; 'flag'; 'gist_earth'; 'gist_gray'; 'gist_heat'; 'gist_ncar'; 'gist_rainbow'; 'gist_stern'
-'gist_yarg'; 'GnBu'; 'gnuplot'; 'gnuplot2'; 'gray'; 'Greens'; 'Greys'; 'hot'
-'hsv'; 'jet'; 'nipy_spectral'; 'ocean'; 'Oranges'; 'OrRd'; 'Paired'; 'Pastel1'
-'Pastel2'; 'pink'; 'PiYG'; 'PRGn'; 'prism'; 'PuBu'; 'PuBuGn'; 'PuOr'
-'PuRd'; 'Purples'; 'rainbow'; 'RdBu'; 'RdGy'; 'RdPu'; 'RdYlBu'; 'RdYlGn'
-'Reds'; 'seismic'; 'Set1'; 'Set2'; 'Set3'; 'Spectral'; 'spectral_r'; 'spring'
-'summer'; 'terrain'; 'winter'; 'Wistia'; 'YlGn'; 'YlGnBu'; 'YlOrBr'; 'YlOrRd'
-'Accent_r'; 'afmhot_r'; 'autumn_r'; 'binary_r'; 'Blues_r'; 'bone_r'; 'BrBG_r'; 'brg_r'
-'BuGn_r'; 'BuPu_r'; 'bwr_r'; 'CMRmap_r'; 'cool_r'; 'coolwarm_r'; 'copper_r'; 'cubehelix_r'
-'Dark2_r'; 'flag_r'; 'gist_earth_r'; 'gist_gray_r'; 'gist_heat_r'; 'gist_ncar_r'; 'gist_rainbow_r'; 'gist_stern_r'
-'gist_yarg_r'; 'GnBu_r'; 'gnuplot_r'; 'gnuplot2_r'; 'gray_r'; 'Greens_r'; 'Greys_r'; 'hot_r'
-'hsv_r'; 'jet_r'; 'nipy_spectral_r'; 'ocean_r'; 'Oranges_r'; 'OrRd_r'; 'Paired_r'; 'Pastel1_r'
-'Pastel2_r'; 'pink_r'; 'PiYG_r'; 'PRGn_r'; 'prism_r'; 'PuBu_r'; 'PuBuGn_r'; 'PuOr_r'
-'PuRd_r'; 'Purples_r'; 'rainbow_r'; 'RdBu_r'; 'RdGy_r'; 'RdPu_r'; 'RdYlBu_r'; 'RdYlGn_r'
-'Reds_r'; 'seismic_r'; 'Set1_r'; 'Set2_r'; 'Set3_r'; 'spectral'; 'Spectral_r'; 'spring_r'
-'summer_r'; 'terrain_r'; 'winter_r'; 'Wistia_r'; 'YlGn_r'; 'YlGnBu_r'; 'YlOrBr_r'; 'YlOrRd_r'};
-
-end
