@@ -58,7 +58,7 @@ function cmp = getPyPlot_cMap(nam,n,keepAlpha,pyCmd)
 %     flag        ocean             RdPu              YlOrRd
 %     flag_r      ocean_r           RdPu_r            YlOrRd_r
 % 
-% V 1.2; Konrad Schumacher, 08.2018
+% V 1.3; Konrad Schumacher, 07.2019
 
 if strcmpi(nam,'!GetNames')
     % translate switch to retrieve colormap names into python-switch:
@@ -86,7 +86,7 @@ assert(~isempty(pyScript), 'getPyPlot_cMap:PyScriptNotFound', ...
 tmpf = tempname;
 
 % call python script
-comd = sprintf('%s %s %s -o %s -n %d', pyCmd, pyScript, nam, tmpf, n);
+comd = sprintf('%s "%s" %s -o "%s" -n %d', pyCmd, pyScript, nam, tmpf, n);
 [s,m] = system(comd);
 
 % check if system command ran w/o error
