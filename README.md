@@ -7,7 +7,7 @@ However, the advantage is that you get all the colormaps implemented in *matplot
 A list of colormap names is provided in the function help section. `getPyPlot_cMap('!GetNames')` returns a cellstring containing all available colormap names.
 See https://matplotlib.org/examples/color/colormaps_reference.html for an illustration of colormaps.
 
-Also available on MatlabCentral File Exchange:
+Also available on MatlabCentral File Exchange:  
 https://de.mathworks.com/matlabcentral/fileexchange/68239-pycolormap4matlab
 
 
