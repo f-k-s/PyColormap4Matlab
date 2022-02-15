@@ -20,6 +20,8 @@ function cmp = getPyPlot_cMap(nam,n,keepAlpha,pyCmd)
 %
 %
 % Colormap name can be one of the following:
+%   ###  NOTE: the set of available colormaps  ###
+%   ###  depends on your python installation!  ###
 %
 % Accent        	Accent_r      	afmhot        	afmhot_r      
 % autumn        	autumn_r      	binary        	binary_r      
@@ -62,7 +64,7 @@ function cmp = getPyPlot_cMap(nam,n,keepAlpha,pyCmd)
 % YlGn          	YlGn_r        	YlGnBu        	YlGnBu_r      
 % YlOrBr        	YlOrBr_r      	YlOrRd        	YlOrRd_r 
 % 
-% V 1.3; Konrad Schumacher, 07.2019
+% V 1.4; Konrad Schumacher, 02.2021
 
 if strcmpi(nam,'!GetNames')
     % translate switch to retrieve colormap names into python-switch:
@@ -94,9 +96,31 @@ comd = sprintf('%s "%s" %s -o "%s" -n %d', pyCmd, pyScript, nam, tmpf, n);
 [s,m] = system(comd);
 
 % check if system command ran w/o error
-assert(s==0, 'getPyPlot_cMap:SystemCMDFailed', ...
+if s~=0
+    baseME = MException('getPyPlot_cMap:SystemCMDFailed', ...
         'There was an error executing the command\n\t%s\nSystem returned:\n\t%s', ...
         comd, m);
+    
+    errPatterns = {'(?<=ModuleNotFoundError: ).*$' ...
+                   'argument cmName: invalid choice: [''\d\w+]+'};
+    mtch = regexp(m,errPatterns,'match','once');
+    
+    if ~isempty(mtch{1}) % ModuleNotFoundError
+        ME = MException('getPyPlot_cMap:SystemCMDFailed:ModulNotFound', ...
+            'Python is missing a required module: %s', mtch{1});
+        
+    elseif ~isempty(mtch{2}) % cmName: invalid choice
+        ME = MException('getPyPlot_cMap:SystemCMDFailed:InvalidChoice', ...
+            'The chosen colormap name was not found in the python installation: %s', ...
+            mtch{2});
+        
+    else % UNHANDLED CASE
+        ME = MException('getPyPlot_cMap:SystemCMDFailed:Unhandled', ...
+            'There was an unexpected error while executing the python script. Sorry.');
+    end
+    
+    throw(baseME.addCause(ME));
+end
 
 
 if strcmp(nam,'listCMapNames')
